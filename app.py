@@ -52,12 +52,12 @@ def home():
 @app.route('/api/v1.0/precipitation')
 def prcp():
     # Calculate the date one year from the last date in data set.
-    currentdate = session.query(Measure.date).order_by(Measure.date.desc()).first()[0]
-    prevyear = dt.datetime.strftime(dt.datetime.strptime(currentdate,'%Y-%m-%d') - dt.timedelta(days = 365),'%Y-%m-%d')
+    current_date = session.query(Measure.date).order_by(Measure.date.desc()).first()[0]
+    prev_year = dt.datetime.strftime(dt.datetime.strptime(current_date,'%Y-%m-%d') - dt.timedelta(days = 365),'%Y-%m-%d')
 
     # Perform a query to retrieve the data and precipitation scores
     date_prcp = session.query(Measure.date,Measure.prcp).\
-        filter(Measure.date >= prevyear).\
+        filter(Measure.date >= prev_year).\
         order_by(Measure.date.desc()).all()
     
     # Dictionary of tempeartures, key: date, value: list of recorded temperatures
@@ -81,15 +81,15 @@ def stations():
 @app.route('/api/v1.0/tobs')
 def tobs():
     # Calculate the date one year from the last date in data set.
-    currentdate = session.query(Measure.date).order_by(Measure.date.desc()).first()[0]
-    prevyear = dt.datetime.strftime(dt.datetime.strptime(currentdate,'%Y-%m-%d') - dt.timedelta(days = 365),'%Y-%m-%d')
+    current_date = session.query(Measure.date).order_by(Measure.date.desc()).first()[0]
+    prev_year = dt.datetime.strftime(dt.datetime.strptime(current_date,'%Y-%m-%d') - dt.timedelta(days = 365),'%Y-%m-%d')
 
     # Order stations by number of occurrences
     active_stations = session.query(Measure.station,func.count(Measure.station)).group_by(Measure.station).order_by(func.count(Measure.station).desc()).all()
 
     # Find temperature observations of most active station
     station_name = active_stations[0][0]
-    temps = session.query(Measure.tobs).filter(Measure.station == station_name).filter(Measure.date >= prevyear).all()
+    temps = session.query(Measure.tobs).filter(Measure.station == station_name).filter(Measure.date >= prev_year).all()
     print('Successful tobs query')
     session.close()
     return jsonify([i[0] for i in temps])
